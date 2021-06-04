@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using MySql.Data.MySqlClient;
 
 // ReSharper disable once CheckNamespace
@@ -23,6 +24,10 @@ namespace OptimaJet.Workflow.MySQL
         public Guid RootProcessId { get; set; }
         public string TenantId { get; set; }
         public string StartingTransition { get; set; }
+        
+        public string SubprocessName { get; set; }
+        public DateTime CreationDate { get; set; }
+        public DateTime? LastTransitionDate { get; set; }
 
         static WorkflowProcessInstance()
         {
@@ -42,6 +47,9 @@ namespace OptimaJet.Workflow.MySQL
                 new ColumnInfo {Name = "RootProcessId", Type = MySqlDbType.Binary},
                 new ColumnInfo {Name = "TenantId", Type = MySqlDbType.VarChar, Size = 1024}, 
                 new ColumnInfo {Name = nameof(StartingTransition)},
+                new ColumnInfo {Name = nameof(SubprocessName)},
+                new ColumnInfo {Name = "CreationDate", Type = MySqlDbType.DateTime},
+                new ColumnInfo {Name = "LastTransitionDate", Type = MySqlDbType.DateTime}
             });
         }
 
@@ -79,6 +87,12 @@ namespace OptimaJet.Workflow.MySQL
                     return TenantId;
                 case nameof(StartingTransition):
                     return StartingTransition;
+                case nameof(SubprocessName):
+                    return SubprocessName;
+                case "CreationDate":
+                    return CreationDate;
+                case "LastTransitionDate":
+                    return LastTransitionDate;
                 default:
                     throw new Exception(string.Format("Column {0} is not exists", key));
             }
@@ -141,15 +155,25 @@ namespace OptimaJet.Workflow.MySQL
                 case nameof(StartingTransition):
                     StartingTransition = value as string;
                     break;
+                case nameof(SubprocessName):
+                    SubprocessName = value as string;
+                    break;
+                case "CreationDate":
+                    CreationDate = (DateTime)value;
+                    break;
+                case "LastTransitionDate":
+                    LastTransitionDate = value as DateTime?;
+                    break;
                 default:
                     throw new Exception($"Column {key} is not exists");
             }
         }
-
-        public static WorkflowProcessInstance[] GetInstances(MySqlConnection connection, IEnumerable<Guid> ids)
+        
+        public static async Task<WorkflowProcessInstance[]> GetProcessInstancesAsync(MySqlConnection connection, IEnumerable<Guid> ids)
         {
-            string selectText = String.Format("SELECT * FROM {0} WHERE `Id` IN ({1})", DbTableName, String.Join(",", ids.Select(x => $"UUID_TO_BIN('{BitConverter.ToString(x.ToByteArray()).Replace("-", String.Empty)}')")));
-            return Select(connection, selectText);
+            string selectText =
+                $"SELECT * FROM {DbTableName} WHERE `Id` IN ({String.Join(",", ids.Select(x => $"UUID_TO_BIN('{BitConverter.ToString(x.ToByteArray()).Replace("-", String.Empty)}')"))})";
+            return await SelectAsync(connection, selectText).ConfigureAwait(false);
         }
     }
 }

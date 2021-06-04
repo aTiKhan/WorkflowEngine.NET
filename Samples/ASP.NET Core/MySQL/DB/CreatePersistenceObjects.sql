@@ -3,7 +3,7 @@
 /*
 Company: OptimaJet
 Project: WorkflowEngine.NET Provider for MySQL
-Version: 4.2
+Version: 5.1
 File: CreatePersistenceObjects.sql
 */
 
@@ -11,6 +11,8 @@ CREATE TABLE IF NOT EXISTS `workflowinbox` (
   `Id` binary(16) NOT NULL,
   `ProcessId` binary(16) default NULL,
   `IdentityId` varchar(256) default NULL,
+  `AddingDate` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `AvailableCommands` varchar(1024) DEFAULT '',
   PRIMARY KEY  (`Id`),
   KEY `ProcessId` (`ProcessId`),
   KEY `IdentityId` (`IdentityId`)
@@ -32,6 +34,9 @@ CREATE TABLE IF NOT EXISTS `workflowprocessinstance` (
   `RootProcessId` binary(16) NOT NULL,
   `TenantId` varchar(1024) NULL,
   `StartingTransition` longtext NULL,
+  `SubprocessName` longtext NULL,
+  `CreationDate`  datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `LastTransitionDate` datetime NULL,
   PRIMARY KEY  (`Id`),
   KEY `SchemeId` (`SchemeId`)
 );
@@ -102,6 +107,8 @@ CREATE TABLE IF NOT EXISTS `workflowprocesstransitionhistory` (
   `FromStateName` varchar(256) default NULL,
   `TriggerName` varchar(256) default NULL,
   `IsFinalised` bit(1) NOT NULL,
+  `StartTransitionTime`  datetime,
+  `TransitionDuration` bigint,
   PRIMARY KEY  (`Id`),
   KEY `ProcessId` (`ProcessId`),
   KEY `ExecutorIdentityId` (`ExecutorIdentityId`),
@@ -160,6 +167,7 @@ CREATE TABLE IF NOT EXISTS `workflowapprovalhistory`
     `TriggerName`      varchar(1024) NULL,
     `Commentary`       longtext      NULL,
     PRIMARY KEY (`Id`),
-    KEY `ProcessId` (`ProcessId`)
+    KEY `ProcessId` (`ProcessId`),
+    KEY `IdentityId` (`IdentityId`)
 );
 

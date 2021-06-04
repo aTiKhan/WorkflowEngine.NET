@@ -1,7 +1,7 @@
 /*
 Company: OptimaJet
 Project: WorkflowEngine.NET Provider for MSSQL
-Version: 4.2
+Version: 5.0
 File: DropPersistenceObjects.sql
 */
 
@@ -72,6 +72,12 @@ IF EXISTS (SELECT 1 FROM sys.procedures WHERE name = N'DropWorkflowInbox')
 BEGIN
 	DROP PROCEDURE [DropWorkflowInbox]
 	PRINT 'DropWorkflowInbox DROP PROCEDURE'
+END
+
+IF EXISTS (SELECT 1 FROM [INFORMATION_SCHEMA].[TABLES] WHERE [TABLE_NAME] = N'WorkflowApprovalHistory')
+BEGIN
+	DROP TABLE [WorkflowInbox]
+	PRINT 'WorkflowApprovalHistory DROP TABLE'
 END
 
 IF  EXISTS (SELECT 1 FROM [INFORMATION_SCHEMA].[TABLES] WHERE [TABLE_NAME] = N'WorkflowProcessTimer')

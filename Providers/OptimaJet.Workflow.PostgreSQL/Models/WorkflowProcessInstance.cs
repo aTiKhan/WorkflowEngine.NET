@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using Npgsql;
 using NpgsqlTypes;
 
@@ -24,6 +25,9 @@ namespace OptimaJet.Workflow.PostgreSQL
         public Guid RootProcessId { get; set; }
         public string TenantId { get; set; }
         public string StartingTransition { get; set; }
+        public string SubprocessName { get; set; }
+        public DateTime CreationDate { get; set; }
+        public DateTime? LastTransitionDate { get; set; }
 
         static WorkflowProcessInstance()
         {
@@ -47,7 +51,10 @@ namespace OptimaJet.Workflow.PostgreSQL
                 new ColumnInfo {Name = "ParentProcessId", Type = NpgsqlDbType.Uuid},
                 new ColumnInfo {Name = "RootProcessId", Type = NpgsqlDbType.Uuid},
                 new ColumnInfo {Name = "TenantId", Size=1024},
-                new ColumnInfo {Name=nameof(StartingTransition)}
+                new ColumnInfo {Name=nameof(StartingTransition)},
+                new ColumnInfo {Name=nameof(SubprocessName)},
+                    new ColumnInfo {Name = "CreationDate", Type = NpgsqlDbType.Timestamp},
+                new ColumnInfo {Name = "LastTransitionDate", Type = NpgsqlDbType.Timestamp}
             });
         }
 
@@ -85,8 +92,14 @@ namespace OptimaJet.Workflow.PostgreSQL
                     return TenantId;
                 case nameof(StartingTransition):
                     return StartingTransition;
+                case nameof(SubprocessName):
+                    return SubprocessName;
+                case "CreationDate":
+                    return CreationDate;
+                case "LastTransitionDate":
+                    return LastTransitionDate;
                 default:
-                    throw new Exception(string.Format("Column {0} is not exists", key));
+                    throw new Exception($"Column {key} is not exists");
             }
         }
 
@@ -149,15 +162,24 @@ namespace OptimaJet.Workflow.PostgreSQL
                 case nameof(StartingTransition):
                     StartingTransition = value as string;
                     break;
+                case nameof(SubprocessName):
+                    SubprocessName = value as string;
+                    break;
+                case "CreationDate":
+                    CreationDate = (DateTime)value;
+                    break;
+                case "LastTransitionDate":
+                    LastTransitionDate = value as DateTime?;
+                    break;
                 default:
                     throw new Exception($"Column {key} is not exists");
             }
         }
 
-        public static WorkflowProcessInstance[] GetInstances(NpgsqlConnection connection, IEnumerable<Guid> ids)
+        public static async Task<WorkflowProcessInstance[]> GetInstancesAsync(NpgsqlConnection connection, IEnumerable<Guid> ids)
         {
-            string selectText = String.Format("SELECT * FROM {0} WHERE \"Id\" IN ({1})", ObjectName, String.Join(",", ids.Select(x => $"'{x}'")));
-            return Select(connection, selectText);
+            string selectText = $"SELECT * FROM {ObjectName} WHERE \"Id\" IN ({String.Join(",", ids.Select(x => $"'{x}'"))})";
+            return await SelectAsync(connection, selectText).ConfigureAwait(false);
         }
     }
 }

@@ -20,5 +20,8 @@ namespace OptimaJet.Workflow.Redis
         public Guid? ParentProcessId { get; set; }
         public Guid RootProcessId { get; set; }
         public string TenantId { get; set; }
+        public string SubprocessName { get; set; }
+        public DateTime CreationDate { get; set; }
+        public DateTime? LastTransitionDate { get; set; }
     }
 }

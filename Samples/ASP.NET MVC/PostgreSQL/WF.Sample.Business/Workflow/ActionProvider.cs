@@ -75,7 +75,7 @@ namespace WF.Sample.Business.Workflow
         {
             //token.ThrowIfCancellationRequested(); // You can use the transferred token at your discretion
             if (_asyncActions.ContainsKey(name))
-                await _asyncActions[name].Invoke(processInstance, runtime, actionParameter, token);
+                await _asyncActions[name].Invoke(processInstance, runtime, actionParameter, token).ConfigureAwait(false);
             else
                 throw new NotImplementedException($"Async Action with name {name} isn't implemented");
         }
@@ -93,7 +93,7 @@ namespace WF.Sample.Business.Workflow
         {
             //token.ThrowIfCancellationRequested(); // You can use the transferred token at your discretion
             if (_asyncConditions.ContainsKey(name))
-                return await _asyncConditions[name].Invoke(processInstance, runtime, actionParameter, token);
+                return await _asyncConditions[name].Invoke(processInstance, runtime, actionParameter, token).ConfigureAwait(false);
 
             throw new NotImplementedException($"Async Condition with name {name} isn't implemented");
         }
@@ -108,12 +108,12 @@ namespace WF.Sample.Business.Workflow
             return _asyncConditions.ContainsKey(name);
         }
 
-        public List<string> GetActions(string schemeCode)
+        public List<string> GetActions(string schemeCode, NamesSearchType namesSearchType)
         {
             return _actions.Keys.Union(_asyncActions.Keys).ToList();
         }
 
-        public List<string> GetConditions(string schemeCode)
+        public List<string> GetConditions(string schemeCode, NamesSearchType namesSearchType)
         {
             return _conditions.Keys.Union(_asyncConditions.Keys).ToList();
         }

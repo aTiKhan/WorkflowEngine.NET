@@ -1,11 +1,12 @@
 /*
 Company: OptimaJet
 Project: WorkflowEngine.NET Provider for MySQL
-Version: 4.2
+Version: 5.0
 File: DropPersistenceObjects.sql
 */
 
 DROP TABLE workflowinbox;
+DROP TABLE WorkflowApprovalHistory;
 DROP TABLE workflowprocessinstance;
 DROP TABLE workflowprocessinstancepersistence;
 DROP TABLE workflowprocessinstancestatus;

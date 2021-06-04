@@ -1,7 +1,7 @@
 /*
 Company: OptimaJet
 Project: WorkflowEngine.NET Provider for MSSQL and Azure SQL
-Version: 4.2
+Version: 5.1
 File: CreatePersistenceObjects.sql
 
 */
@@ -57,6 +57,9 @@ BEGIN
 		,[IsDeterminingParametersChanged] BIT DEFAULT 0 NOT NULL
         ,[TenantId] NVARCHAR(1024)
 		,[StartingTransition] NVARCHAR(max)
+		,[SubprocessName] NVARCHAR(max)
+		,[CreationDate] datetime NOT NULL CONSTRAINT DF_WorkflowProcessInstance_CreationDate DEFAULT getdate()
+		,[LastTransitionDate] datetime NULL
 		)
 
 	CREATE INDEX IX_RootProcessId ON WorkflowProcessInstance (RootProcessId)
@@ -101,6 +104,8 @@ BEGIN
 		,[IsFinalised] BIT NOT NULL
 		,[FromStateName] NVARCHAR(max)
 		,[TriggerName] NVARCHAR(max)
+		,[StartTransitionTime] DATETIME
+		,[TransitionDuration] BIGINT
 		)
 
 	CREATE CLUSTERED INDEX IX_ProcessId_Clustered ON WorkflowProcessTransitionHistory (ProcessId)
@@ -184,6 +189,8 @@ BEGIN
 		[Id] UNIQUEIDENTIFIER NOT NULL CONSTRAINT PK_WorkflowInbox PRIMARY KEY NONCLUSTERED
 		,[ProcessId] UNIQUEIDENTIFIER NOT NULL
 		,[IdentityId] NVARCHAR(256) NOT NULL
+		,[AddingDate] DATETIME NOT NULL DEFAULT GETDATE()
+		,[AvailableCommands] NVARCHAR(max) NOT NULL DEFAULT ''
 		)
 
 	CREATE CLUSTERED INDEX IX_IdentityId_Clustered ON WorkflowInbox (IdentityId)
@@ -312,7 +319,7 @@ BEGIN
 CREATE TABLE [dbo].[WorkflowApprovalHistory](
 	[Id] UNIQUEIDENTIFIER NOT NULL CONSTRAINT PK_WorkflowApprovalHistory PRIMARY KEY NONCLUSTERED
 	,[ProcessId] UNIQUEIDENTIFIER NOT NULL
-	,[IdentityId] NVARCHAR(1024) NULL
+	,[IdentityId] NVARCHAR(256) NULL
 	,[AllowedTo] NVARCHAR(max) NULL
 	,[TransitionTime] DateTime NULL
 	,[Sort] BIGINT NULL
@@ -323,6 +330,7 @@ CREATE TABLE [dbo].[WorkflowApprovalHistory](
     )
 
 	CREATE CLUSTERED INDEX IX_ProcessId_Clustered ON WorkflowApprovalHistory (ProcessId)
+	CREATE NONCLUSTERED INDEX IX_IdentityId ON WorkflowApprovalHistory (IdentityId)
 	PRINT 'WorkflowApprovalHistory CREATE TABLE'
 END
 
