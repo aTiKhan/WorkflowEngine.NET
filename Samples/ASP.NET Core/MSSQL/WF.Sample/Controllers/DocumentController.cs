@@ -6,9 +6,11 @@ using WF.Sample.Business.Model;
 using WF.Sample.Business.Workflow;
 using WF.Sample.Helpers;
 using WF.Sample.Models;
+using System.Threading;
+using System.Threading.Tasks;
 using AutoMapper;
-using WF.Sample.Business.DataAccess;
 using Microsoft.AspNetCore.Mvc;
+using WF.Sample.Business.DataAccess;
 using OptimaJet.Workflow.Core.Persistence;
 using OptimaJet.Workflow.Core.Runtime;
 
@@ -35,19 +37,19 @@ namespace WF.Sample.Controllers
             {
                 Page = page,
                 PageSize = pageSize,
-                Docs = _documentRepository.Get(out count, page, pageSize).Select(c=> GetDocumentModel<DocumentModel>(c)).ToList(),
+                Docs = _documentRepository.Get(out count, page, pageSize).Select(GetDocumentModel<DocumentModel>).ToList(),
                 Count = count,
             });
         }
 
-        public ActionResult Inbox(int page = 1)
+        public async Task<ActionResult> Inbox(int page = 1)
         {
             var identityId = CurrentUserSettings.GetCurrentUser(HttpContext).ToString();
             
-            var inbox =   WorkflowInit.Runtime.PersistenceProvider
-                .GetInboxByIdentityIdAsync(identityId, Paging.Create(page, pageSize)).Result;
+            var inbox = await WorkflowInit.Runtime.PersistenceProvider
+                .GetInboxByIdentityIdAsync(identityId, Paging.Create(page, pageSize));
             
-            int count = WorkflowInit.Runtime.PersistenceProvider.GetInboxCountByIdentityIdAsync(identityId).Result;
+            int count = await WorkflowInit.Runtime.PersistenceProvider.GetInboxCountByIdentityIdAsync(identityId);
 
             return View("Inbox", new DocumentListModel<InboxDocumentModel>()
             {
@@ -58,14 +60,14 @@ namespace WF.Sample.Controllers
             });
         }
 
-        public ActionResult Outbox(int page = 1)
+        public async Task<ActionResult> Outbox(int page = 1)
         {
             var identityId = CurrentUserSettings.GetCurrentUser(HttpContext).ToString();
             
-            var outbox =   WorkflowInit.Runtime.PersistenceProvider
-                .GetOutboxByIdentityIdAsync(identityId, Paging.Create(page, pageSize)).Result;
+            var outbox = await WorkflowInit.Runtime.PersistenceProvider
+                .GetOutboxByIdentityIdAsync(identityId, Paging.Create(page, pageSize));
             
-            int count = WorkflowInit.Runtime.PersistenceProvider.GetOutboxCountByIdentityIdAsync(identityId).Result;
+            int count = await WorkflowInit.Runtime.PersistenceProvider.GetOutboxCountByIdentityIdAsync(identityId);
             
             return View("Outbox", new DocumentListModel<OutboxDocumentModel>()
             {
@@ -75,10 +77,11 @@ namespace WF.Sample.Controllers
                 Count = count,
             });
         }
+        
         #endregion
 
         #region Edit
-        public ActionResult Edit(Guid? Id)
+        public async Task<ActionResult> Edit(Guid? Id)
         {
             DocumentModel model = null;
 
@@ -87,8 +90,8 @@ namespace WF.Sample.Controllers
                 var d = _documentRepository.Get(Id.Value);
                 if(d != null)
                 {
-                    CreateWorkflowIfNotExists(Id.Value);
-                    var history = GetApprovalHistory(Id.Value);
+                    await CreateWorkflowIfNotExists(Id.Value);
+                    var history = await GetApprovalHistory(Id.Value);
                     
                     model = new DocumentModel()
                                 {
@@ -103,8 +106,8 @@ namespace WF.Sample.Controllers
                                     Number = d.Number,
                                     StateName = d.StateName,
                                     Sum = d.Sum,
-                                    Commands = GetCommands(Id.Value),
-                                    AvailiableStates = GetStates(Id.Value),
+                                    Commands = await GetCommands(Id.Value),
+                                    AvailiableStates = await GetStates(Id.Value),
                                     HistoryModel = new DocumentHistoryModel{Items = history}
                                 };
                 }
@@ -124,15 +127,15 @@ namespace WF.Sample.Controllers
             return View(model);
         }
         
-        public ActionResult ExecuteCommand(Guid Id, DocumentModel model, string command)
+        public async Task<ActionResult> ExecuteCommand(Guid Id, DocumentModel model, string command)
         {
-            ExecuteCommand(Id, command, model);
+            await ExecuteCommand(Id, command, model);
             return RedirectToAction("Inbox");
             
         }
         
         [HttpPost]
-        public ActionResult Edit(Guid? Id, DocumentModel model, string button)
+        public async Task<ActionResult> Edit(Guid? Id, DocumentModel model, string button)
         {
          
             if (!ModelState.IsValid)
@@ -165,17 +168,17 @@ namespace WF.Sample.Controllers
                 return RedirectToAction("Index");
             if (button != "Save")
             {
-                ExecuteCommand(doc.Id, button, model);
+                await ExecuteCommand(doc.Id, button, model);
             }
             return RedirectToAction("Edit", new { doc.Id});
             
         }
+
         #endregion
 
         #region Delete
-
-
-        public ActionResult DeleteRows(Guid[] ids)
+        
+        public async Task<ActionResult> DeleteRows(Guid[] ids)
         {
             if (ids == null || ids.Length == 0)
                 return Content("Items not selected");
@@ -184,7 +187,7 @@ namespace WF.Sample.Controllers
             {
                 foreach (var id in ids)
                 {
-                    WorkflowInit.Runtime.PersistenceProvider.DeleteProcessAsync(id);
+                    await WorkflowInit.Runtime.PersistenceProvider.DeleteProcessAsync(id);
                 }
                 
                 _documentRepository.Delete(ids);
@@ -200,7 +203,7 @@ namespace WF.Sample.Controllers
         #endregion
 
         #region Workflow
-        private DocumentCommandModel[] GetCommands(Guid id)
+        private async Task<DocumentCommandModel[]> GetCommands(Guid id)
         {
             var result = new List<DocumentCommandModel>();
             
@@ -213,11 +216,11 @@ namespace WF.Sample.Controllers
             return result.ToArray();
         }
 
-        private Dictionary<string, string> GetStates(Guid id)
+        private async Task<Dictionary<string, string>> GetStates(Guid id)
         {
 
             var result = new Dictionary<string, string>();
-            var states = WorkflowInit.Runtime.GetAvailableStateToSet(id);
+            var states = await WorkflowInit.Runtime.GetAvailableStateToSetAsync(id);
             foreach (var state in states)
             {
                 if (!result.ContainsKey(state.Name))
@@ -227,7 +230,7 @@ namespace WF.Sample.Controllers
 
         }
 
-        private void ExecuteCommand(Guid id, string commandName, DocumentModel document)
+        private async Task ExecuteCommand(Guid id, string commandName, DocumentModel document)
         {
             var currentUser = CurrentUserSettings.GetCurrentUser(HttpContext).ToString();
             
@@ -242,12 +245,34 @@ namespace WF.Sample.Controllers
                     ImpersonatedIdentityId = currentUser
                 }.AddTemporaryParameter("Comment",document.Comment);
                 
-                WorkflowInit.Runtime.SetState(setStateParams);
+                await WorkflowInit.Runtime.SetStateAsync(setStateParams);
               
                 return;
             }
 
-            var commands = WorkflowInit.Runtime.GetAvailableCommands(id, currentUser);
+            if (commandName.Equals("Resume", StringComparison.InvariantCultureIgnoreCase))
+            {
+                if (string.IsNullOrEmpty(document.StateNameToSet))
+                    return;
+                var pi = await WorkflowInit.Runtime.GetProcessInstanceAndFillProcessParametersAsync(id);
+
+                var activity = pi.ProcessScheme.Activities.FirstOrDefault(a => a.IsForSetState && a.State.Equals(document.StateNameToSet, StringComparison.OrdinalIgnoreCase));
+
+                if (activity == null)
+                {
+                    return;
+                }
+                var resumeParams = new ResumeParams(id,activity.Name)
+                {
+                    IdentityId = currentUser,
+                    ImpersonatedIdentityId = currentUser
+                }.AddTemporaryParameter("Comment",document.Comment);
+                
+                await WorkflowInit.Runtime.ResumeAsync(resumeParams);
+                return;
+            }
+
+            var commands = await WorkflowInit.Runtime.GetAvailableCommandsAsync(id, currentUser);
 
             var command =
                 commands.FirstOrDefault(
@@ -259,15 +284,15 @@ namespace WF.Sample.Controllers
             if (command.Parameters.Count(p => p.ParameterName == "Comment") == 1)
                 command.Parameters.Single(p => p.ParameterName == "Comment").Value = document.Comment ?? string.Empty;
 
-            WorkflowInit.Runtime.ExecuteCommand(command,currentUser,currentUser);
+            await WorkflowInit.Runtime.ExecuteCommandAsync(command,currentUser,currentUser);
         }
 
-        private void CreateWorkflowIfNotExists(Guid id)
+        private async Task CreateWorkflowIfNotExists(Guid id)
         {
-            if (WorkflowInit.Runtime.IsProcessExists(id))
+            if (await WorkflowInit.Runtime.IsProcessExistsAsync(id))
                 return;
 
-            WorkflowInit.Runtime.CreateInstance("SimpleWF", id);
+            await WorkflowInit.Runtime.CreateInstanceAsync("SimpleWF", id);
         }
 
         #endregion
@@ -292,7 +317,7 @@ namespace WF.Sample.Controllers
 
         private List<InboxDocumentModel> GetDocumentsByInbox(List<InboxItem> inbox)
         {
-            var ids = inbox.Select(x => x.ProcessId).ToList();
+            var ids = inbox.Select(x => x.ProcessId).Distinct().ToList();
             
             var documents = _documentRepository.GetByIds(ids)
                 .ToDictionary(x=>x.Id, x=>x);
@@ -323,10 +348,10 @@ namespace WF.Sample.Controllers
 
             return docs;
         }
-
+        
         private List<OutboxDocumentModel> GetDocumentsByOutbox(List<OutboxItem> outbox)
         {
-            var ids = outbox.Select(x => x.ProcessId).ToList();
+            var ids = outbox.Select(x => x.ProcessId).Distinct().ToList();
             
             var documents = _documentRepository.GetByIds(ids)
                 .ToDictionary(x=>x.Id, x=>x);
@@ -360,10 +385,10 @@ namespace WF.Sample.Controllers
             return docs;
         }
         
-        private List<DocumentApprovalHistory> GetApprovalHistory(Guid id)
+        private async Task<List<DocumentApprovalHistory>> GetApprovalHistory(Guid id)
         {
-            var approvalHistory =   WorkflowInit.Runtime.PersistenceProvider
-                .GetApprovalHistoryByProcessIdAsync(id).Result;
+            var approvalHistory = await WorkflowInit.Runtime.PersistenceProvider
+                .GetApprovalHistoryByProcessIdAsync(id);
             var employees =  _employeeRepository.GetAll();
             List<DocumentApprovalHistory> histories = new List<DocumentApprovalHistory>();
             foreach (var item in approvalHistory)

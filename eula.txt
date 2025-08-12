@@ -11,7 +11,7 @@ SUMMARY
 5. Support plans include support only for officially published versions of Workflow Engine or Workflow Server. To get support for modified versions of Workflow Engine or Workflow Server, please, get a quote.
 
 EULA
-IMPORTANT — READ CAREFULLY: This OPTIMAJET LLC (“OPTIMAJET”) End-User License Agreement (“EULA”) is a legal agreement between you, a developer of software applications, (“Developer End User”) and OPTIMAJET for all OPTIMAJET products, frameworks, components, source code, demos, intermediate files, media, printed materials, and online or electronic documentation (“SOFTWARE DEVELOPMENT PRODUCT(S)”) contained in this distribution.
+IMPORTANT — READ CAREFULLY: This Optimajet Limited (“OPTIMAJET”) End-User License Agreement (“EULA”) is a legal agreement between you, a developer of software applications, (“Developer End User”) and OPTIMAJET for all OPTIMAJET products, frameworks, components, source code, demos, intermediate files, media, printed materials, and online or electronic documentation (“SOFTWARE DEVELOPMENT PRODUCT(S)”) contained in this distribution.
 
 By installing, copying, or otherwise using the SOFTWARE DEVELOPMENT PRODUCT(S), you agree to be bound by the terms of this EULA. If you do not agree to any part of the terms of this EULA, DO NOT INSTALL, COPY, USE, EVALUATE, OR REPLICATE IN ANY MANNER, ANY PART, FILE OR PORTION OF THE SOFTWARE DEVELOPMENT PRODUCT(S).
 
@@ -58,7 +58,6 @@ OptimaJet.Workflow.MongoDB.dll
 OptimaJet.Workflow.MySQL.dll
 OptimaJet.Workflow.Oracle.dll
 OptimaJet.Workflow.PostgreSQL.dll
-OptimaJet.Workflow.RavenDB.dll
 OptimaJet.Workflow.Redis.dll
 JavaScript Designer library:
 
@@ -84,7 +83,6 @@ WorkflowEngine.NET-ProviderForMSSQL
 WorkflowEngine.NET-ProviderForMySQL
 WorkflowEngine.NET-ProviderForOracle
 WorkflowEngine.NET-ProviderForPostgreSQL
-WorkflowEngine.NET-ProviderForRavenDB
 WorkflowEngine.NET-ProviderForRedis
 Public GitHub repository:
 
@@ -148,9 +146,6 @@ DnsClient (Apache license)
 The following license applies only to the Redis provider:
 
 StackExchange.Redis (MIT License)
-The following license applies only to the RavenDB provider:
-
-RavenDB.Client (MIT License)
 The following licenses apply only to the Ignite provider:
 
 Remotion.Linq (Apache license)
@@ -178,7 +173,7 @@ The SOFTWARE DEVELOPMENT PRODUCT(S) is protected by copyright laws and internati
 The SOFTWARE DEVELOPMENT PRODUCT(S) will be made available for download from workflowengine.io exclusively.
 
 10. EXPORT RESTRICTIONS
-OPTIMAJET expressly complies with all export restrictions imposed by the government of the Russian Federation. You, as Developer End User, must agree not to export or re-export the SOFTWARE DEVELOPMENT PRODUCT(S) within any created application to any country, person, entity or end user subject to Russian Federation export restrictions.
+You, as Developer End User, must agree not to export or re-export the SOFTWARE DEVELOPMENT PRODUCT(S) within any created application to any country, person, entity or end user subject to Russian Federation.
 
 11. DISCLAIMER OF WARRANTY
 OPTIMAJET expressly disclaims any warranty for the SOFTWARE DEVELOPMENT PRODUCT(S). THE SOFTWARE DEVELOPMENT PRODUCT(S) AND ANY RELATED DOCUMENTATION IS PROVIDED “AS IS” WITHOUT WARRANTY OF ANY KIND, EITHER EXPRESS OR IMPLIED, INCLUDING, WITHOUT LIMITATION, THE IMPLIED WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, OR NONINFRINGEMENT. OPTIMAJET DOES NOT WARRANT, GUARANTEE, OR MAKE ANY REPRESENTATIONS REGARDING THE USE, OR THE RESULTS OF THE USE, OF THE SOFTWARE DEVELOPMENT PRODUCT(S) IN TERMS OF CORRECTNESS, ACCURACY, RELIABILITY, OR OTHERWISE. THE ENTIRE RISK ARISING OUT OF USE OR PERFORMANCE OF THE SOFTWARE DEVELOPMENT PRODUCT(S) REMAINS WITH YOU. No oral or written information or advice given by OPTIMAJET or its employees shall create a warranty or in any way increase the scope of this warranty.
@@ -195,12 +190,12 @@ You hereby agree to indemnify OPTIMAJET and its officers, directors, employees, 
 Without prejudice to any other rights or remedies, OPTIMAJET will terminate this EULA upon your failure to comply with all the terms and conditions of this EULA. In such events, Developer End User must destroy all copies of the SOFTWARE DEVELOPMENT PRODUCT(S) and all of its component parts including any related documentation, and must remove ANY and ALL use of OPTIMAJET intellectual property from any applications distributed by Developer End User, whether in native, altered or compiled states.
 
 15. MISCELLANEOUS
-This EULA may only be modified in writing signed by you and an authorized officer of OPTIMAJET LLC. If any provision of this EULA is found void or unenforceable, the remainder will remain valid and enforceable according to its terms. If any remedy provided is determined to have failed for its essential purpose, all limitations of liability and exclusions of damages set forth in the Limited Warranty shall remain in effect.
+This EULA may only be modified in writing signed by you and an authorized officer of Optimajet Limited. If any provision of this EULA is found void or unenforceable, the remainder will remain valid and enforceable according to its terms. If any remedy provided is determined to have failed for its essential purpose, all limitations of liability and exclusions of damages set forth in the Limited Warranty shall remain in effect.
 
 OPTIMAJET reserves all rights not specifically granted in this EULA.
 
 YOU ACKNOWLEDGE THAT YOU HAVE READ AND UNDERSTAND THIS AGREEMENT AND YOU AGREE TO BE BOUND BY THE TERMS OF THIS AGREEMENT UPON INSTALLATION AND/OR USE of ALL SOFTWARE DEVELOPMENT PRODUCT(S) INCLUDED IN THIS DISTRIBUTION.
 
-© 2011- 2020 OPTIMAJET LLC
+© 2011- 2023 Optimajet Limited
 
 All trademarks and registered trademarks are property of their respective owners.

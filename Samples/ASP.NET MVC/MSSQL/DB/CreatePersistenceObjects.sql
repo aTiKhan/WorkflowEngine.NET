@@ -1,7 +1,7 @@
 /*
 Company: OptimaJet
 Project: WorkflowEngine.NET Provider for MSSQL and Azure SQL
-Version: 5.1
+Version: 16.2
 File: CreatePersistenceObjects.sql
 
 */
@@ -60,9 +60,12 @@ BEGIN
 		,[SubprocessName] NVARCHAR(max)
 		,[CreationDate] datetime NOT NULL CONSTRAINT DF_WorkflowProcessInstance_CreationDate DEFAULT getdate()
 		,[LastTransitionDate] datetime NULL
+	    ,[CalendarName] NVARCHAR(450)
 		)
 
 	CREATE INDEX IX_RootProcessId ON WorkflowProcessInstance (RootProcessId)
+	
+	CREATE INDEX IX_CalendarName ON WorkflowProcessInstance (CalendarName)
 
 	PRINT 'WorkflowProcessInstance CREATE TABLE'
 END
@@ -96,6 +99,8 @@ BEGIN
 		,[ProcessId] UNIQUEIDENTIFIER NOT NULL
 		,[ExecutorIdentityId] NVARCHAR(256)
 		,[ActorIdentityId] NVARCHAR(256)
+        ,[ExecutorName] NVARCHAR(256)
+        ,[ActorName] NVARCHAR(256)
 		,[FromActivityName] NVARCHAR(max) NOT NULL
 		,[ToActivityName] NVARCHAR(max) NOT NULL
 		,[ToStateName] NVARCHAR(max)
@@ -161,6 +166,30 @@ BEGIN
 
 	PRINT 'spWorkflowProcessResetRunningStatus CREATE PROCEDURE'
 END
+
+IF NOT EXISTS (
+        SELECT 1
+        FROM sys.procedures
+        WHERE name = N'DropUnusedWorkflowProcessScheme'
+    )
+    BEGIN
+        EXECUTE (
+            'CREATE PROCEDURE [DropUnusedWorkflowProcessScheme]
+    AS
+    BEGIN
+        DELETE wps FROM WorkflowProcessScheme AS wps 
+            WHERE wps.IsObsolete = 1 
+                AND NOT EXISTS (SELECT * FROM WorkflowProcessInstance wpi WHERE wpi.SchemeId = wps.Id )
+
+        RETURN (SELECT COUNT(*) 
+            FROM WorkflowProcessInstance wpi LEFT OUTER JOIN WorkflowProcessScheme wps ON wpi.SchemeId = wps.Id 
+            WHERE wps.Id IS NULL)
+    END'
+            )
+
+        PRINT 'DropUnusedWorkflowProcessScheme CREATE PROCEDURE'
+    END
+
 
 IF NOT EXISTS (
 		SELECT 1
@@ -236,9 +265,44 @@ BEGIN
 		)
 
 	CREATE CLUSTERED INDEX IX_NextExecutionDateTime_Clustered ON WorkflowProcessTimer (NextExecutionDateTime)
+    CREATE INDEX IX_ProcessId ON WorkflowProcessTimer (ProcessId)
 
 	PRINT 'WorkflowProcessTimer CREATE TABLE'
 END
+
+
+IF NOT EXISTS (
+        SELECT 1
+        FROM [INFORMATION_SCHEMA].[TABLES]
+        WHERE [TABLE_NAME] = N'WorkflowProcessAssignment'
+    )
+    BEGIN
+        CREATE TABLE WorkflowProcessAssignment (
+            [Id] UNIQUEIDENTIFIER NOT NULL CONSTRAINT PK_WorkflowProcessAssignment PRIMARY KEY NONCLUSTERED
+            ,[AssignmentCode] NVARCHAR(2048) NOT NULL
+            ,[ProcessId] UNIQUEIDENTIFIER NOT NULL
+            ,[Name] NVARCHAR(max) NOT NULL
+            ,[Description] NVARCHAR(max)
+            ,[StatusState] NVARCHAR(max) NOT NULL
+            ,[DateCreation] DATETIME NOT NULL
+            ,[DateStart] DATETIME
+            ,[DateFinish] DATETIME
+            ,[DeadlineToStart] DATETIME
+            ,[DeadlineToComplete] DATETIME
+            ,[Executor] NVARCHAR(256) NOT NULL
+            ,[Observers] NVARCHAR(max)
+            ,[Tags] NVARCHAR(max)
+            ,[IsActive] BIT NOT NULL
+            ,[IsDeleted] BIT NOT NULL
+        )
+
+        CREATE INDEX IX_Assignment_ProcessId ON WorkflowProcessAssignment (ProcessId)
+        CREATE INDEX IX_Assignment_AssignmentCode ON WorkflowProcessAssignment (AssignmentCode)
+        CREATE INDEX IX_Assignment_Executor ON WorkflowProcessAssignment (Executor)
+        CREATE INDEX IX_Assignment_ProcessId_Executor ON WorkflowProcessAssignment (ProcessId, Executor)
+
+        PRINT 'WorkflowProcessAssignment CREATE TABLE'
+    END
 
 IF NOT EXISTS (
 		SELECT 1
