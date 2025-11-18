@@ -1,9 +1,9 @@
 <Project>
   <!-- Version -->
   <PropertyGroup>
-    <Version>17.3.0</Version>
-    <AssemblyVersion>17.3.0</AssemblyVersion>
-    <FileVersion>17.3.0</FileVersion>
+    <Version>20.0.1</Version>
+    <AssemblyVersion>20.0.0</AssemblyVersion>
+    <FileVersion>20.0.0</FileVersion>
   </PropertyGroup>
   <!-- Build -->
   <PropertyGroup>
