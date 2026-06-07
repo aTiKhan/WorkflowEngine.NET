@@ -184,7 +184,6 @@
     "Restrict": "Restrict",
     "ConditionsListShouldNotBeEmpty": "Conditions list should not be empty",
     "AlwaysConditionShouldBeSingle": "Always condition should be single",
-    "AlwaysConditionIsIllegal": "Always condition is illegal",
     "OtherwiseConditionShouldBeSingle": "Otherwise condition should be single",
     "AlwaysConditionIsIllegal": "Always condition is illegal",
     "ConditionalLabel": "Conditional",
@@ -324,7 +323,6 @@
   "ProcessInfoFormLabel": {
     "Title": "Process Info",
     "IsObsolete": "IsObsolete",
-    "DefiningParameters": "Defining parameters",
     "ProcessParameters": "Process parameters",
     "SystemParametersTabName": "System Parameters",
     "ProcessParametersTabName": "Process Parameters",
